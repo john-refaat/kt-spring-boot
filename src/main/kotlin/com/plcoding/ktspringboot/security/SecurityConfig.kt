@@ -1,6 +1,7 @@
 package com.plcoding.ktspringboot.security
 
 import jakarta.servlet.DispatcherType
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpStatus
@@ -12,7 +13,9 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 class SecurityConfig(
-    val jwtAuthFilter: JwtAuthFilter
+    val jwtAuthFilter: JwtAuthFilter,
+    @field:Value("\${security.public-endpoints}")
+    private val publicEndpoints: List<String>
 ) {
 
     @Bean
@@ -20,12 +23,14 @@ class SecurityConfig(
         return httpSecurity.csrf { it.disable() }
             .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
             .authorizeHttpRequests {
-                it.requestMatchers("/auth/**").permitAll()
-                    .dispatcherTypeMatchers(
-                        DispatcherType.ERROR,
-                        DispatcherType.FORWARD,
-                    ).permitAll()
-                    .anyRequest().authenticated()
+                var registry = it
+                for (endpoint in publicEndpoints)
+                    registry = registry.requestMatchers(endpoint).permitAll()
+                registry.dispatcherTypeMatchers(
+                    DispatcherType.ERROR,
+                    DispatcherType.FORWARD,
+                ).permitAll()
+                .anyRequest().authenticated()
             }
             .exceptionHandling { configurer ->
                 configurer.authenticationEntryPoint(
