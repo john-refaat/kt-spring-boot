@@ -3,6 +3,7 @@ package com.plcoding.ktspringboot.security
 import io.jsonwebtoken.Claims
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.security.Keys
+import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import java.util.*
@@ -12,12 +13,15 @@ class JwtService(
     @param:Value("\${jwt.secret}")
     private val jwtSecretEncoded: String //The Base64 encoded secret key
 ) {
+    private val logger = KotlinLogging.logger {}
+
     //The decoded secret key used to sign and verify the JWT (Used to generate The 3rd component of the Token)
     private val secretKey = Keys.hmacShaKeyFor(Base64.getDecoder().decode(jwtSecretEncoded))
     val accessTokenValidityMs = 15L * 60L * 1000L   // 15 minutes
     val refreshTokenValidityMs = 1 * 60L * 60L * 1000L //1 hour
 
     private fun generateToken(userId: String, type: String, expiry: Long): String {
+        logger.debug { "Generating $type token for user $userId with expiry $expiry ms" }
         val now = Date()
         val expiryDate = Date(now.time + expiry)
         return Jwts.builder()
@@ -39,6 +43,7 @@ class JwtService(
     fun generateRefreshToken(userId: String): String = generateToken(userId, "refresh", refreshTokenValidityMs)
 
     fun validateAccessToken(token: String): Boolean {
+        logger.debug { "Validating access token" }
         val claims = parseAllClaims(token) ?: return false
         val tokenType = claims["type"] as? String ?: return false
         return claims.subject != null && tokenType == "access"
@@ -46,6 +51,7 @@ class JwtService(
     }
 
     fun validateRefreshToken(token: String): Boolean {
+        logger.debug { "Validating refresh token" }
         val claims = parseAllClaims(token) ?: return false
         val tokenType = claims["type"] as? String ?: return false
         return claims.subject != null && tokenType == "refresh"
@@ -66,6 +72,7 @@ class JwtService(
     }
 
     private fun parseAllClaims(token: String): Claims? {
+        logger.debug { "Parsing JWT token claims" }
         return try {
             Jwts.parser()
                 .verifyWith(secretKey)
@@ -73,6 +80,7 @@ class JwtService(
                 .parseSignedClaims(getRawToken(token))
                 .payload
         } catch (e: Exception) {
+            logger.error(e) { "Failed to parse JWT token" }
             null
         }
     }

@@ -19,6 +19,7 @@ class JwtAuthFilter(private val jwtService: JwtService,
         private const val BEARER_PREFIX = "Bearer "
         private const val AUTHORIZATION_HEADER = "Authorization"
     }
+
     private val pathMatcher = AntPathMatcher()
 
     override fun doFilterInternal(
@@ -26,7 +27,7 @@ class JwtAuthFilter(private val jwtService: JwtService,
         response: HttpServletResponse,
         filterChain: FilterChain
     ) {
-        println("Public Endpoints: $publicEndpoints")
+        logger.info { "Executing doFilterInternal..." }
         if (isPublicEndpoint(request.requestURI)) {
             filterChain.doFilter(request, response)
             return
@@ -39,6 +40,7 @@ class JwtAuthFilter(private val jwtService: JwtService,
     }
 
     private fun processJwtAuthentication(authHeader: String) {
+        logger.info { "Processing JWT Authentication..." }
         if (jwtService.validateAccessToken(authHeader)) {
             val userId = jwtService.getUserIdFromToken(authHeader)
             // Added Authorities list to set authenticated = true
