@@ -61,7 +61,7 @@ class AuthService(
 
         val accessToken = jwtService.generateAccessToken(user.id.toHexString())
         val refreshToken = jwtService.generateRefreshToken(user.id.toHexString())
-
+        refreshTokenRepository.deleteByUserRef(user.id)
         storeRefreshToken(user, refreshToken)
         logger.info { "Successfully logged in user: $email" }
         return TokenPair(accessToken, refreshToken)

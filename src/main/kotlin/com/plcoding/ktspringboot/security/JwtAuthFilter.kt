@@ -28,13 +28,11 @@ class JwtAuthFilter(private val jwtService: JwtService,
         filterChain: FilterChain
     ) {
         logger.info { "Executing doFilterInternal..." }
-        if (isPublicEndpoint(request.requestURI)) {
-            filterChain.doFilter(request, response)
-            return
-        }
-        val authHeader = request.getHeader(AUTHORIZATION_HEADER)
-        if (authHeader != null && authHeader.startsWith( BEARER_PREFIX)) {
-            processJwtAuthentication(authHeader)
+        if (!isPublicEndpoint(request.requestURI)) {
+            val authHeader = request.getHeader(AUTHORIZATION_HEADER)
+            if (authHeader != null && authHeader.startsWith(BEARER_PREFIX)) {
+                processJwtAuthentication(authHeader)
+            }
         }
         filterChain.doFilter(request, response)
     }

@@ -18,7 +18,7 @@ class JwtService(
     //The decoded secret key used to sign and verify the JWT (Used to generate The 3rd component of the Token)
     private val secretKey = Keys.hmacShaKeyFor(Base64.getDecoder().decode(jwtSecretEncoded))
     val accessTokenValidityMs = 15L * 60L * 1000L   // 15 minutes
-    val refreshTokenValidityMs = 1 * 60L * 60L * 1000L //1 hour
+    val refreshTokenValidityMs = 2 * 24 * 60L * 60L * 1000L //2 Days
 
     private fun generateToken(userId: String, type: String, expiry: Long): String {
         logger.debug { "Generating $type token for user $userId with expiry $expiry ms" }

@@ -39,6 +39,7 @@ class AuthController(private val authService: AuthService,
     )
 
     data class RefreshRequest(
+        @field:NotBlank(message = "Refresh token must not be blank")
         val refreshToken: String
     )
 
