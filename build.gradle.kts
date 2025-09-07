@@ -32,9 +32,18 @@ dependencies {
     implementation("io.github.microutils:kotlin-logging-jvm:3.0.5")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("io.projectreactor:reactor-test")
-    testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
+    //testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test")
     testImplementation("org.springframework.security:spring-security-test")
+
+    testImplementation("io.mockk:mockk:1.13.12")
+    testImplementation("com.nimbusds:nimbus-jose-jwt:9.37") // for generating test JWTs
+    testImplementation("de.flapdoodle.embed:de.flapdoodle.embed.mongo:4.21.0")
+    // If you hit a real DB in integration tests:
+    testImplementation("org.testcontainers:junit-jupiter")
+    testImplementation("org.testcontainers:mongodb")
+
+
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     compileOnly("jakarta.servlet:jakarta.servlet-api:6.1.0")
     implementation("io.jsonwebtoken:jjwt-api:0.12.6")

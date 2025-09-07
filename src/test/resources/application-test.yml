@@ -1,0 +1,5 @@
+spring:
+  data:
+    mongodb:
+      database: testdb
+      # DO NOT set uri here → lets Spring Boot use embedded Mongo
