@@ -14,24 +14,10 @@ import org.testcontainers.containers.MongoDBContainer
 import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
 
-@Testcontainers
 @DataMongoTest
-@ActiveProfiles("test")
 class UserRepositoryContainerTest @Autowired constructor(
     val userRepository: UserRepository
-) {
-
-    companion object {
-        @Container
-        @JvmStatic
-        val mongo = MongoDBContainer("mongo:8.0")
-
-        @JvmStatic
-        @DynamicPropertySource
-        fun mongoProps(registry: DynamicPropertyRegistry) {
-            registry.add("spring.data.mongodb.uri", mongo::getReplicaSetUrl)
-        }
-    }
+): MongoDbContainerTest() {
 
     @BeforeEach
     fun setUp() {
