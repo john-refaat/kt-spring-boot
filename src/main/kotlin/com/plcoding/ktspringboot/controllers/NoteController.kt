@@ -2,6 +2,7 @@ package com.plcoding.ktspringboot.controllers
 
 import com.plcoding.ktspringboot.model.Note
 import com.plcoding.ktspringboot.repository.NoteRepository
+import com.plcoding.ktspringboot.service.NoteService
 import jakarta.validation.Valid
 import jakarta.validation.constraints.NotBlank
 import mu.KotlinLogging
@@ -15,7 +16,7 @@ import java.time.Instant
 @RestController
 @RequestMapping("/notes")
 class NoteController(
-    private val repository: NoteRepository
+    private val service: NoteService
 ) {
     private val logger = KotlinLogging.logger {}
 
@@ -40,7 +41,7 @@ class NoteController(
     fun save(@Valid @RequestBody request: NoteRequest): NoteResponse {
         val ownerId = SecurityContextHolder.getContext().authentication.principal as String
         logger.info { "Creating note with title '${request.title}' for user $ownerId" }
-        val savedNote = repository.save(Note(
+        val savedNote = service.saveNoteForOwner(Note(
                 id = request.id?.let { ObjectId(it) } ?: ObjectId.get(),
                 title = request.title,
                 content = request.content,
@@ -56,8 +57,7 @@ class NoteController(
     fun findByOwnerId(): List<NoteResponse> {
         val ownerId = SecurityContextHolder.getContext().authentication.principal as String
         logger.info { "Retrieving notes for user $ownerId" }
-        return repository.findByOwnerId(ObjectId(ownerId))
-            .map { it.toResponse() }
+        return service.getByOwnerId(ownerId).map { it.toResponse() }
     }
 
     @DeleteMapping("/{id}")
@@ -66,15 +66,9 @@ class NoteController(
             logger.warn { "Invalid note id format: $id" }
             throw ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid note id format")
         }
-
         val ownerId = SecurityContextHolder.getContext().authentication.principal as String
         logger.info { "Attempting to delete note $id for user $ownerId" }
-        val foundNotes = repository.findByIdAndOwnerId(ObjectId(id), ObjectId(ownerId))
-        if (foundNotes.isEmpty()) {
-            logger.warn { "Note not found: $id" }
-            throw ResponseStatusException(HttpStatus.NOT_FOUND, "Note not found")
-        }
-        repository.deleteById(ObjectId(id))
+        service.deleteByIdAndOwnerId(id, ownerId)
         logger.info { "Successfully deleted note: $id" }
     }
 

@@ -79,7 +79,7 @@ class AuthService(
         val user = userRepository.findById(ObjectId(userId))
             .orElseThrow {
                 logger.warn { "Token refresh failed - user not found for ID: $userId" }
-                ResponseStatusException(HttpStatusCode.valueOf(401), "Invalid Refresh Token")
+                ResponseStatusException(HttpStatusCode.valueOf(401), "Invalid refresh token")
             }
 
         val newAccessToken = jwtService.generateAccessToken(userId)
